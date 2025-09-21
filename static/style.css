@@ -1,0 +1,138 @@
+/* Global dark theme */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Container */
+.container {
+  max-width: 800px;
+  width: 90%;
+  text-align: center;
+}
+
+/* Header */
+header h1 {
+  color: #bb86fc;
+  margin-bottom: 0.2em;
+}
+
+header p {
+  color: #a1a1a1;
+  margin-bottom: 2em;
+}
+
+/* Chat Box */
+.chat-box {
+  background: #1e1e1e;
+  height: 400px;
+  overflow-y: auto;
+  padding: 1em;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  margin-bottom: 1.5em;
+  text-align: left;
+}
+
+/* Messages */
+.message {
+  padding: 0.6em 1em;
+  border-radius: 8px;
+  margin: 0.5em 0;
+  max-width: 70%;
+}
+
+.user-message {
+  background: #bb86fc;
+  color: #fff;
+  margin-left: auto;
+}
+
+.bot-message {
+  background: #333;
+  color: #e0e0e0;
+  margin-right: auto;
+}
+
+/* Input + Mic */
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 1.5em;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.8em;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+#micBtn {
+  background: #bb86fc;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: background 0.3s;
+}
+
+#micBtn:hover {
+  background: #9a67ea;
+}
+
+/* Controls */
+.controls {
+  margin-top: 1em;
+}
+
+.controls input, .controls button {
+  margin: 0.3em 0;
+  padding: 0.6em;
+  border-radius: 6px;
+  border: none;
+}
+
+.controls input[type="file"],
+.controls input[type="text"] {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.controls button {
+  background: #03dac6;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.controls button:hover {
+  background: #00bfa5;
+}
+
+/* Footer */
+footer {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: 2em;
+}
+
+
+
+  
