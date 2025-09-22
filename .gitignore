@@ -1,5 +1,6 @@
 # Ignore environment variables
 .env
+voicebot_env/
 venv/
 voicebot/lib/
 __pycache__/
