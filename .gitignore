@@ -1,9 +1,2 @@
 # Ignore environment variables
 .env
-# Ignore Python virtual environment
-voicebot/lib/
-__pycache__/
-*.pyc
-voicebot
-env/
-venv/
