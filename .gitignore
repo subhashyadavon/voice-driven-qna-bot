@@ -4,3 +4,6 @@
 voicebot/lib/
 __pycache__/
 *.pyc
+voicebot/
+env/
+venv/
