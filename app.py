@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, request, jsonify
 from speech_recognition import transcribe_audio
-from vectorstore import embed_and_store
+from vectorstore import create_embeddings, store_vectors
 from sentence_transformers import SentenceTransformer
 from rag_chain import query_rag
 import requests
@@ -13,8 +13,6 @@ import docx
 
 app = Flask(__name__)
 
-# Initialize embedding model once
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 @app.route("/")
@@ -61,8 +59,9 @@ def upload_document():
         else:
             return jsonify({"message": "No file or URL provided"}), 400
 
-        # Send text to vectorstore (store embeddings in Pinecone)
-        embed_and_store(text_data)
+        
+        vectors = create_embeddings(text_data)   # Step 1: create embeddings
+        store_vectors(vectors)                   # Step 2: store in Pinecone
 
         return jsonify({"message": "Document successfully uploaded and embedded!"})
 
@@ -93,24 +92,25 @@ def handle_query():
     else:
         return jsonify({"message": "No text or audio provided"}), 400
 
-    # embedding
-    vector = embedding_model.encode(text).tolist()
-
-    # local RAG (no OpenAI)
     try:
-        answer = query_rag(vector, text)
+        # Use vectorstore function to generate embedding
+        vectors = create_embeddings(text)  # returns list of (id, vector, metadata)
+        # For single query, we only need the first embedding
+        query_vector = vectors[0][1] if vectors else []
+
+        # Run local RAG with query + its vector
+        answer = query_rag(query_vector, text)
+
+        return jsonify({"answer": answer})
+
     except Exception as e:
-        print("Local RAG error:", e)
+        print("Query error:", e)
         return jsonify({"message": f"RAG query failed: {e}"}), 500
-
-    return jsonify({"answer": answer})
-
-
 
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=50018)
+    app.run(debug=True, port=50020)
 
 
 

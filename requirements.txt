@@ -26,6 +26,7 @@ lxml==6.0.2
 MarkupSafe==3.0.2
 mpmath==1.3.0
 networkx==3.2.1
+nltk==3.9.1
 numpy==2.0.2
 openai==1.108.1
 packaging==24.2

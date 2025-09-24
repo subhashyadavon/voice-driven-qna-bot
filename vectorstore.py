@@ -1,14 +1,18 @@
 # vectorstore.py
-
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
 from config import PINECONE_API_KEY, PINECONE_ENV
 import hashlib
 
+import nltk
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
 # ---------------------------
 # Initialize embedding model
 # ---------------------------
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-mpnet-base-v2")  # 768D
 
 # ---------------------------
 # Initialize Pinecone
@@ -23,7 +27,7 @@ if "my-index" in pc.list_indexes().names():
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
-        dimension=384,  # all-MiniLM-L6-v2 outputs 384-dimensional vectors
+        dimension=768,  
         metric="cosine",
         spec=ServerlessSpec(cloud="aws", region="us-east-1")
     )
@@ -31,37 +35,66 @@ if index_name not in pc.list_indexes().names():
 index = pc.Index(index_name)
 
 # ---------------------------
-# Helper: split text into chunks
+# Cleans, tokenizes, removes stopwords, and chunks text into overlapping windows.
 # ---------------------------
-def chunk_text(text, chunk_size=500, overlap=50):
+# Download NLTK resources once
+nltk.download("punkt")
+nltk.download("stopwords")
+def preprocess_and_chunk(text, chunk_size=300, overlap=150, language="english"):
     """
-    Splits text into overlapping chunks.
+    Cleans, tokenizes, removes stopwords, and chunks text into overlapping windows.
     """
-    words = text.split()
+    # Lowercase and remove noise (non-alphabetic chars)
+    text = re.sub(r"[^a-zA-Z\s]", " ", text.lower())
+
+    # Tokenize
+    tokens = word_tokenize(text)
+
+    # Remove stopwords
+    stop_words = set(stopwords.words(language))
+    tokens = [word for word in tokens if word not in stop_words]
+
+    # Chunk with overlap
     chunks = []
     start = 0
-    while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunks.append(" ".join(words[start:end]))
+    while start < len(tokens):
+        end = min(start + chunk_size, len(tokens))
+        chunks.append(" ".join(tokens[start:end]))
         start += chunk_size - overlap
+
     return chunks
 
+
 # ---------------------------
-# Main: embed and store
+# Create embeddings
 # ---------------------------
-def embed_and_store(text: str):
+def create_embeddings(text: str):
     """
-    Splits text into chunks, generates embeddings locally, and inserts into Pinecone.
+    Splits text into cleaned chunks and generates embeddings locally.
+    Returns a list of (id, vector, metadata).
     """
-    chunks = chunk_text(text)
-    vectors_to_upsert = []
+    chunks = preprocess_and_chunk(text)
+    vectors = []
 
     for chunk in chunks:
         vector = embedding_model.encode(chunk).tolist()  # Local embedding
         uid = hashlib.sha256(chunk.encode("utf-8")).hexdigest()
-        vectors_to_upsert.append((uid, vector, {"text": chunk}))
+        vectors.append((uid, vector, {"text": chunk}))
 
-    # Upsert all vectors into Pinecone
-    index.upsert(vectors_to_upsert)
+    return vectors
+
+# ---------------------------
+# Store into Pinecone
+# ---------------------------
+def store_vectors(vectors):
+    """
+    Inserts precomputed vectors into Pinecone.
+    """
+    if not vectors:
+        print("No vectors to upsert.")
+        return
+    index.upsert(vectors)
+    print(f"Upserted {len(vectors)} vectors into Pinecone.")
+
 
 
