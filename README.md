@@ -8,7 +8,7 @@ An intelligent chat application that combines **speech-to-text**, **vector searc
 - **Speech-to-Text** – Uses `gpt-4o-mini-transcribe` for accurate, real-time transcription.  
 - **Embeddings** – Converts text into vector representations using `all-mpnet-base-v2`.  
 - **Vector Database** – Stores and retrieves semantic embeddings with **Pinecone**.  
-- **Retrieval-Augmented Generation (RAG)** – Enhances LLM responses with context-aware retrieval.  
+- **Retrieval-Augmented Generation (RAG)** – Enhances LLM `facebook/bart-large-xsum`responses with context-aware retrieval.  
 - **LangChain Integration** – Manages the RAG pipeline, prompt orchestration, and conversational flow.  
 - **Hybrid Input** – Supports both typed messages and voice commands.  
 
