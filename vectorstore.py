@@ -4,15 +4,17 @@ from pinecone import Pinecone, ServerlessSpec
 from config import PINECONE_API_KEY, PINECONE_ENV
 import hashlib
 
-import nltk
+
 import re
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+
+
+from transformers import AutoTokenizer
 
 # ---------------------------
 # Initialize embedding model
 # ---------------------------
 embedding_model = SentenceTransformer("all-mpnet-base-v2")  # 768D
+tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-mpnet-base-v2")
 
 # ---------------------------
 # Initialize Pinecone
@@ -38,28 +40,21 @@ index = pc.Index(index_name)
 # Cleans, tokenizes, removes stopwords, and chunks text into overlapping windows.
 # ---------------------------
 # Download NLTK resources once
-nltk.download("punkt")
-nltk.download("stopwords")
-def preprocess_and_chunk(text, chunk_size=300, overlap=150, language="english"):
-    """
-    Cleans, tokenizes, removes stopwords, and chunks text into overlapping windows.
-    """
-    # Lowercase and remove noise (non-alphabetic chars)
-    text = re.sub(r"[^a-zA-Z\s]", " ", text.lower())
 
-    # Tokenize
-    tokens = word_tokenize(text)
+def preprocess_and_chunk(text, chunk_size=10, overlap=5):
+    # Clean minimal noise
+    text = re.sub(r"\s+", " ", text.strip())
 
-    # Remove stopwords
-    stop_words = set(stopwords.words(language))
-    tokens = [word for word in tokens if word not in stop_words]
+    # Tokenize into mpnet tokens
+    tokens = tokenizer.encode(text, add_special_tokens=False)
 
-    # Chunk with overlap
+    # Sliding window chunking
     chunks = []
     start = 0
     while start < len(tokens):
         end = min(start + chunk_size, len(tokens))
-        chunks.append(" ".join(tokens[start:end]))
+        chunk = tokenizer.decode(tokens[start:end])
+        chunks.append(chunk)
         start += chunk_size - overlap
 
     return chunks

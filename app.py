@@ -110,7 +110,7 @@ def handle_query():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=50020)
+    app.run(debug=True, port=50024)
 
 
 

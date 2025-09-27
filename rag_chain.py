@@ -6,33 +6,22 @@ from vectorstore import index
 from transformers import pipeline
 
 # ---------------------------
-# Setup Pinecone + HuggingFace LLM
+# Setup Pinecone
 # ---------------------------
 pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 
-# HuggingFace text-generation pipeline (small summarization / QA model)
-# Swap with a bigger model like "tiiuae/falcon-7b-instruct" if you have GPU/VRAM
+# ---------------------------
+# Setup HuggingFace model
+# ---------------------------
 qa_pipeline = pipeline(
     "text2text-generation",
-    model="facebook/bart-large-cnn"
+    model="facebook/bart-large-xsum"
 )
 
 # ---------------------------
 # RAG query function
 # ---------------------------
 def query_rag(user_vector, user_text, top_k=5):
-    """
-    Retrieves relevant chunks from Pinecone and generates a concise answer using a local HuggingFace LLM.
-
-    Args:
-        user_vector: embedding vector of the query
-        user_text: raw query text (string)
-        top_k: number of top chunks to retrieve from Pinecone
-
-    Returns:
-        str: LLM-generated answer
-    """
-    # 1️⃣ Query Pinecone
     try:
         query_response = index.query(
             vector=user_vector,
@@ -47,26 +36,15 @@ def query_rag(user_vector, user_text, top_k=5):
     if not retrieved_texts:
         return f"Sorry, I couldn’t find relevant info for: {user_text}"
 
-    # 2️⃣ Build combined context
     context = "\n\n".join(retrieved_texts)
 
-    # 3️⃣ Construct prompt instructing the LLM to avoid hallucinations
-    prompt = (
-        f"You are a helpful assistant. Use only the context below to answer the user's question. "
-        f"If the answer is not present, respond with: 'I don't know.'\n\n"
-        f"Context:\n{context}\n\nQuestion: {user_text}\nAnswer concisely:"
-    )
+    prompt = context
 
-    # 4️⃣ Run HuggingFace LLM
     try:
-        result = qa_pipeline(prompt, max_length=300, do_sample=False)
-        answer = result[0]['generated_text'].strip()
+        result = qa_pipeline(prompt, max_new_tokens=150, do_sample=False)
+        answer = result[0].get('summary_text', result[0].get('generated_text', context))
     except Exception as e:
         print("Local LLM error:", e)
-        # fallback: return the retrieved context
-        answer = f"Your question: {user_text}\n\nRelevant context:\n{context}"
+        answer = context
 
     return answer
-
-
-
