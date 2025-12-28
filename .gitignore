@@ -1,5 +1,15 @@
-# Ignore environment variables
+# Environments
 .env
+.venv
+venv/
 voicebot_env/
-# Ignore Python cache files
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.pyc
+
+# Local
+.DS_Store
