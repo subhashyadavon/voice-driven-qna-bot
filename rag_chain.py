@@ -38,7 +38,7 @@ def query_rag(user_vector, user_text, top_k=5):
 
     context = "\n\n".join(retrieved_texts)
 
-    prompt = context
+    prompt = f"Answer the user's question based ONLY on the context below:\n\nContext: {context}\n\nQuestion: {user_text}"
 
     try:
         result = qa_pipeline(prompt, max_new_tokens=150, do_sample=False)
