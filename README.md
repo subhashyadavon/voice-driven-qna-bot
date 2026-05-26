@@ -1,6 +1,4 @@
-# 🎤 AI-Powered Chat Application with Speech Recognition & RAG  
-
-![Frontend screenshot](image.png)
+# AI-Powered Chat Application with Speech Recognition & RAG  
 
 An intelligent chat application that combines **speech-to-text**, **vector search**, and **retrieval-augmented generation (RAG)** to enable natural, voice-driven conversations. Users can interact via microphone or text, while the system leverages **OpenAI models, Pinecone, and LangChain** to provide contextual, AI-powered responses.  
 
